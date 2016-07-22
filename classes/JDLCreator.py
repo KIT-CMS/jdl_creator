@@ -382,34 +382,19 @@ class JDLCreator(object):
         jdl_content = self.__get_JDL_content()
 
         if hasattr(self, 'job_folder'):
-            command = "mkdir -p " + self.job_folder
-            os.system(command)
-            command = "mkdir -p " + self.job_folder + "/log"
-            os.system(command)
-            command = "mkdir -p " + self.job_folder + "/out"
-            os.system(command)
-            command = "mkdir -p " + self.job_folder + "/error"
-            os.system(command)
+            # "else" is not needed, since we start with default folder "."
+            os.makedirs(self.job_folder, exist_ok=True)
+            os.makedirs('%s/log' % self.job_folder, exist_ok=True)
+            os.makedirs('%s/out' % self.job_folder, exist_ok=True)
+            os.makedirs('%s/error' % self.job_folder, exist_ok=True)
             # copy script to folder
-            if os.path.isfile(self.executable):
-                command = "cp " + self.executable + " " + self.job_folder
-                os.system(command)
-                command = "chmod +x " + self.job_folder + "/" + self.executable
-                os.system(command)
-        else:
-            os.system("mkdir -p log")
-            os.system("mkdir -p out")
-            os.system("mkdir -p error")
-            command = "chmod +x " + self.executable
-            os.system(command)
+            if os.path.isfile(self.executable) and self.job_folder != '.':
+                shutil.copy(self.executable, self.job_folder)
+                # make sure the file is executable
+                os.chmod('%s/%s' % (self.job_folder, self.executable), stat.S_IXGRP | stat.S_IXGRP | stat.S_IXOTH)
 
         # create JDL file
-        if len(self.job_folder) > 0:
-            self.__JDLFilename = self.job_folder + '/'
-        else:
-            self.__JDLFilename = ""
-        self.__JDLFilename += ('JDL_' +
-                               str(self.executable).split('/')[-1].rsplit('.')[0])
+        self.__JDLFilename = '%s/JDL_%s' % (self.job_folder, str(self.executable).split('/')[-1].rsplit('.')[0])
 
         with open(self.__JDLFilename, 'w') as file:
             for line in jdl_content:
@@ -417,11 +402,7 @@ class JDLCreator(object):
                 file.write(line)
 
         # create argument list file
-        if len(self.job_folder) > 0:
-            arguments_filename = self.job_folder + '/'
-        else:
-            arguments_filename = ""
-        arguments_filename += 'arguments.txt'
+        arguments_filename = '%s/arguments.txt' % self.job_folder
 
         with open(arguments_filename, 'w') as file:
             for index, line in enumerate(self.arguments):
@@ -430,9 +411,7 @@ class JDLCreator(object):
                 file.write(line)
 
         if len(self.job_folder) > 0:
-            print("wrote JDL file: " + self.__JDLFilename + " in folder " + self.job_folder)
-        else:
-            print("wrote JDL file: " + self.__JDLFilename)
+            print('wrote JDL file: %s' % self.__JDLFilename)
 
     def Submit(self, exe='', arguments='', remove_after_start=True):
         ###
@@ -466,5 +445,4 @@ class JDLCreator(object):
             os.chdir(main_path)
 
         if remove_after_start is True:
-            command = "rm " + self.__JDLFilename
-            os.system(command)
+            os.remove(self.__JDLFilename)
