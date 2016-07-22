@@ -1,7 +1,11 @@
 from __future__ import unicode_literals, print_function
 
 import os
+import shutil
+import stat
 import subprocess
+
+
 # TODO GUI
 # import PyQt4
 
@@ -9,55 +13,54 @@ import subprocess
 class CloudSite(object):
     def __init__(self, name=''):
         self.name = name
-        self.universe =''
+        self.universe = ''
         self.docker_image = ''
-        self.requirements =''
+        self.requirements = ''
         if name == 'condocker':
-            self.universe = "docker"
-            self.docker_image = "mschnepf/slc6-condocker"
+            self.universe = 'docker'
+            self.docker_image = 'mschnepf/slc6-condocker'
             self.requirements = '(TARGET.CLOUD_SITE == "condocker")'
         elif name == 'ekpcloud':
-            self.universe = "vanilla"
+            self.universe = 'vanilla'
             self.requirements = '(TARGET.CLOUD_SITE == "ekpcloud")'
 
         elif name == 'ekpsupermachines':
-            self.universe = "docker"
-            self.docker_image = "mschnepf/slc6-condocker"
+            self.universe = 'docker'
+            self.docker_image = 'mschnepf/slc6-condocker'
             self.requirements = '(TARGET.CLOUD_SITE == "ekpsupermachines")'
 
         elif name == 'bwforcluster':
-            self.universe = "vanilla"
+            self.universe = 'vanilla'
             self.requirements = '(TARGET.CLOUD_SITE == "bwforcluster")'
 
         elif name == 'gridka':
-            self.universe = "vanilla"
+            self.universe = 'vanilla'
             self.requirements = '(TARGET.CLOUD_SITE == "gridka")'
 
         elif name == 'oneandone':
-            self.universe = "vanilla"
+            self.universe = 'vanilla'
             self.requirements = '(TARGET.CLOUD_SITE == "oneandone")'
         else:
-            self.universe = "docker"
-            self.docker_image = "mschnepf/slc6-condocker"
-            self.requirements = ""
+            self.universe = 'docker'
+            self.docker_image = 'mschnepf/slc6-condocker'
+            self.requirements = ''
 
 
 class JDLCreator(object):
     """Class to create JDL files for EKP HTCondor system."""
 
     """Lines for output, log and errors."""
-    LINE_OUTPUT = "output = out/$(Process).out"
-    LINE_ERROR = "error = error/$(Process).err"
-    LINE_LOG = "log = log/$(Process).log"
+    LINE_OUTPUT = 'output = out/$(Process).out'
+    LINE_ERROR = 'error = error/$(Process).err'
+    LINE_LOG = 'log = log/$(Process).log'
 
-    def __init__(self, site_name="", executable="", wall_time=0, job_folder="",
-                 extra_lines="", output_files="", arguments=""):
+    def __init__(self, site_name='', executable='', wall_time=0, job_folder='.',
+                 extra_lines='', output_files='', arguments=''):
         # types (str, str, int, str, list, str, list) -> None
+
         ###
         # public attributes - user is allowed to change these values
         ###
-
-        print("asdfasdghrgasgoqhiohioht90!!!!!")
         self.executable = executable
 
         ###
@@ -77,6 +80,7 @@ class JDLCreator(object):
             self._arguments = arguments
         else:
             self._arguments = []
+
         ###
         # private attributes - only we need them
         ###
@@ -117,7 +121,6 @@ class JDLCreator(object):
         """Defines executable"""
         self.executable = exe
 
-
     @property
     def extra_lines(self):
         """List of extra lines."""
@@ -135,7 +138,7 @@ class JDLCreator(object):
         # type: (str) -> None
         self._extra_lines.append(str(line))
 
-    def ClearExtraLines(self, line):
+    def ClearExtraLines(self):
         # type: (str) -> None
         self._extra_lines = []
 
@@ -156,11 +159,11 @@ class JDLCreator(object):
         # check data-type
         elif isinstance(requirement_, str):
             if len(self.requirements) > 0:
-                self._cloud_site.requirements += " && ( " + requirement_ + " ) "
+                self._cloud_site.requirements += ' && ( %s )' % requirement_
             else:
-                self._cloud_site.requirements += " ( " + requirement_ + " ) "
+                self._cloud_site.requirements += ' ( %s ) ' % requirement_
         else:
-            raise TypeError("Argument is not a string")
+            raise TypeError('Argument is not a string')
 
     @property
     def wall_time(self):
@@ -179,7 +182,6 @@ class JDLCreator(object):
         # type: (int) -> None
         self._wall_time = time
 
-
     @property
     def memory(self):
         """Requested momory in MB"""
@@ -196,8 +198,6 @@ class JDLCreator(object):
         """Expected maximum memory (upper limit) in MB"""
         self._memory = memory_
 
-
-
     @property
     def arguments(self):
         # type: () -> list
@@ -213,7 +213,7 @@ class JDLCreator(object):
         elif isinstance(argument, (str, int, float)):
             self._arguments.append(str(argument))
         else:
-            raise TypeError("Argument is not a string or a number")
+            raise TypeError('Argument is not a string or a number')
 
     @arguments.deleter
     def arguments(self):
@@ -229,8 +229,7 @@ class JDLCreator(object):
         elif isinstance(argument, (str, int, float)):
             self._arguments.append(str(argument))
         else:
-            raise TypeError("Argument is not a string or a number")
-
+            raise TypeError('Argument is not a string or a number')
 
     @property
     def image(self):
@@ -240,22 +239,19 @@ class JDLCreator(object):
     @image.setter
     def image(self, image_name):
         # type: (str) -> None
-        if self._cloud_site.universe == "docker":
+        if self._cloud_site.universe == 'docker':
             self._cloud_site.docker_image = image_name
         else:
-            raise AttributeError("You are not in a docker universe. :-(")
+            raise AttributeError('You are not in a docker universe. :-(')
 
     def ChangeImage(self, image_name):
         # type: (str) -> None
         print(self._cloud_site.docker_image)
         print(str(self._cloud_site.universe))
-        if self._cloud_site.universe == "docker":
+        if self._cloud_site.universe == 'docker':
             self._cloud_site.docker_image = image_name
         else:
-            raise AttributeError("You are not in a docker universe. :-(")
-
-
-    
+            raise AttributeError('You are not in a docker universe. :-(')
 
     @property
     def output_files(self):
@@ -292,7 +288,7 @@ class JDLCreator(object):
         # type: () -> None
         """Print current attribute values to screen."""
         print(self._cloud_site.universe)
-        if self._cloud_site.universe == "docker":
+        if self._cloud_site.universe == 'docker':
             print(self._cloud_site.docker_image)
         if len(self.executable) > 0:
             print(self.executable)
@@ -309,25 +305,25 @@ class JDLCreator(object):
     def __get_JDL_content(self):
         # type: () -> list
         """Create JDL content(!). This does NOT create the JDL file.
-        
-         Put all attributes in a list of lines for the JDL file.
-         """
+
+        Put all attributes in a list of lines for the JDL file.
+        """
         jdl_content = list()
 
         if len(self.executable) is 0:
-            raise ValueError("No executable set!")
+            raise ValueError('No executable set!')
         exe = self.executable.split('/')[-1]  # remove path to executable
 
-        jdl_content.append("universe = " + self._cloud_site.universe)
+        jdl_content.append('universe = %s' % self._cloud_site.universe)
 
-        if self._cloud_site.universe == "docker":
-            jdl_content.append("docker_image = " + str(self._cloud_site.docker_image))
+        if self._cloud_site.universe == 'docker':
+            jdl_content.append('docker_image = %s' % self._cloud_site.docker_image)
             # do docker stuff for exe
-            jdl_content.append("executable = ./" + exe)
-            jdl_content.append("should_transfer_files = YES")
-            jdl_content.append("transfer_input_files = " + self.executable)
+            jdl_content.append('executable = ./%s' % exe)
+            jdl_content.append('should_transfer_files = YES')
+            jdl_content.append('transfer_input_files = %s' % self.executable)
         else:
-            jdl_content.append("executable = " + exe)
+            jdl_content.append('executable = %s' % exe)
 
         # add log files
         jdl_content.append(self.LINE_OUTPUT)
@@ -335,41 +331,39 @@ class JDLCreator(object):
         jdl_content.append(self.LINE_LOG)
 
         # add line to transfer files back
-        jdl_content.append('transfer_output_files = "' + self.output_files + '"')
+        jdl_content.append('transfer_output_files = "%s"' % self.output_files)
 
-        # add environments
+        # add environment variables
         jdl_content.append('getenv = True')
 
         # add remote job
         if self._remote_job is True:
-            jdl_content.append("remote_job = true")
-
+            jdl_content.append('remote_job = true')
 
         # add requirements
         if len(self._cloud_site.requirements) > 0:
-            jdl_content.append("requirements = " + self._cloud_site.requirements)
+            jdl_content.append('requirements = %s' % self._cloud_site.requirements)
         else:
-            print("Warning: You didn't set requirements! Please add '.requirements = str'")
+            print('Warning: You did not set requirements! Please add ".requirements = str"')
 
         # add wall_time, if set
         if self._wall_time > 0:
-            jdl_content.append("+RequestWalltime = " + str(self._wall_time))
+            jdl_content.append('+RequestWalltime = %d' % self._wall_time)
         else:
-            print("Warning: You didn't set a walltime! Please add ' .wall_time = int'  in seconds")
+            print('Warning: You did not set a walltime! Please add ".wall_time = int" in seconds')
 
         # add memeory, if set
         if self._memory > 0:
-            jdl_content.append("RequestMemory = " + str(self._memory))
+            jdl_content.append('RequestMemory = %d' % self._memory)
         else:
-            print("Warning: You didn't set the requested memory! Please add '.memory = int' in MB")
-
+            print('Warning: You did not set the requested memory! Please add ".memory = int" in MB')
 
         # add extra lines to JDL
         if len(self.extra_lines) > 0:
             for line in self.extra_lines:
                 jdl_content.append(line)
 
-        jdl_content.append("queue arguments from arguments.txt")
+        jdl_content.append('queue arguments from arguments.txt')
 
         return jdl_content
 
@@ -463,10 +457,10 @@ class JDLCreator(object):
             main_path = os.getcwd()
             os.chdir(self.job_folder)
 
-        command = "condor_submit " + self.__JDLFilename.split('/')[-1]
+        command = 'condor_submit %s' % self.__JDLFilename.split('/')[-1]
         print(command)
         if subprocess.call(command.split(), shell=False):
-            raise RuntimeError("submit failed! Check your configuration")
+            raise RuntimeError('submit failed! Check your configuration')
 
         # jump back
         if len(main_path) > 0:
