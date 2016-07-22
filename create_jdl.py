@@ -1,25 +1,33 @@
 #!/usr/bin/env python
-from classes.JDLCreator import JDLCreator # import the class to create and submit JDL files
-import numpy
+from classes.JDLCreator import JDLCreator  # import the class to create and submit JDL files
+
 
 def main():
-    jobs = JDLCreator()  #run jobs on condocker cloude site
-    ##################################
-    # submit job 
-    ##################################
-    jobs.SetExecutable("job.sh")  # set job script
+    """Submit a simple example job"""
 
-    #build list of arguments
-    arguments=[]
-    for i in numpy.arange(0, 5,1):
-        arguments.append(i)
+    jobs = JDLCreator()  # Default (no Cloud Site supplied): Docker with SLC6 image
+    # Some example sites:
+    # site_name='condocker'         Exclusively run the job on our desktop cluster
+    # site_name='bwforcluster'      Freiburg
+    # site_name='ekpsupermachines'  "Super Machines" in floor 9 server room
+    # site_name='gridka'            gridKa School Training VMs
 
-    jobs.SetArguments(arguments)              # set arguments
+    jobs.executable = "job.sh"  # name of the job script
+    jobs.wall_time = 3  # job will finish in 3 seconds, it's just some "echo"s
+    jobs.memory = 64  # We're running a simple bash script. 64 MB memory are more than enough
 
-    jobs.requirements= "(Target.PROVIDES_CPU ==True) && (TARGET.PROVIDES_EKP_RESOURCES == True)"
-    jobs.SetFolder('condor_jobs/')                # set folder !!! you have to copy your job file into the folder
-    jobs.WriteJDL()                           # write an JDL file and create folder for log files
+    # build list of arguments: 1,2,3,4,5
+    arguments = [x for x in range(0, 5)]
+    # you can also build a regular list via arg = []; arg.append(value)
+
+    jobs.arguments = arguments  # set arguments for condor job
+
+    # Our job requires lots of CPU resources and needs access to the local EKP resources
+    jobs.requirements = "(Target.PROVIDES_CPU ==True) && (TARGET.PROVIDES_EKP_RESOURCES == True)"
+
+    jobs.job_folder = 'condor_jobs'  # set name of the folder, where files and information are stored
+    jobs.WriteJDL()  # write an JDL file and create folder for log files
+
 
 if __name__ == "__main__":
     main()
-

@@ -48,7 +48,6 @@ class CloudSite(object):
 
 class JDLCreator(object):
     """Class to create JDL files for EKP HTCondor system."""
-
     """Lines for output, log and errors."""
     LINE_OUTPUT = 'output = out/$(Process).out'
     LINE_ERROR = 'error = error/$(Process).err'
@@ -57,6 +56,7 @@ class JDLCreator(object):
     def __init__(self, site_name='', executable='', wall_time=0, job_folder='.',
                  extra_lines='', output_files='', arguments=''):
         # types (str, str, int, str, list, str, list) -> None
+        """Class to create JDL files for EKP HTCondor system."""
 
         ###
         # public attributes - user is allowed to change these values
@@ -371,9 +371,7 @@ class JDLCreator(object):
         [print(line) for line in self.__get_JDL_content()]
 
     def WriteJDL(self, exe='', arguments=''):
-        """Create folder (if set) and  write JDLFile, argument list file,
-
-            copy job in the folder"""
+        """Create job_folder (if set) and  write JDLFile & argument list file; also copies job in the folder"""
         if len(exe) > 0:
             self.executable = exe
         if len(arguments) > 0:
