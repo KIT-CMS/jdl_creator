@@ -281,8 +281,7 @@ class JDLCreator(object):
 
     def SetRemoteJob(self, value):
         # type: (boolean) -> None
-        self._remote_jobs = value
-
+        self._remote_job = value
 
     def print_stats(self):
         # type: () -> None
@@ -296,7 +295,7 @@ class JDLCreator(object):
         print(self.LINE_OUTPUT)
         print(self.LINE_ERROR)
         print(self.LINE_LOG)
-        print(self.requirement)
+        print(self.requirements)
 
         if len(self.arguments) > 0:
             print('Arguments: ')
