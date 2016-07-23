@@ -15,7 +15,7 @@ class CloudSite(object):
         if name == 'condocker':
             self.universe = "docker"
             self.docker_image = "mschnepf/slc6-condocker"
-            self.requirements = '(TARGET.CLOUD_SITE == "condocker")'
+
         elif name == 'ekpcloud':
             self.universe = "vanilla"
             self.requirements = '(TARGET.CLOUD_SITE == "ekpcloud")'
@@ -23,7 +23,7 @@ class CloudSite(object):
         elif name == 'ekpsupermachines':
             self.universe = "docker"
             self.docker_image = "mschnepf/slc6-condocker"
-            self.requirements = '(TARGET.CLOUD_SITE == "ekpsupermachines")'
+            self.requirements = '(TARGET.CLOUDSITE == "ekpsupermachines")'
 
         elif name == 'bwforcluster':
             self.universe = "vanilla"
@@ -36,9 +36,9 @@ class CloudSite(object):
         elif name == 'oneandone':
             self.universe = "vanilla"
             self.requirements = '(TARGET.CLOUD_SITE == "oneandone")'
+
         else:
-            self.universe = "docker"
-            self.docker_image = "mschnepf/slc6-condocker"
+            self.universe = "vanilla"
             self.requirements = ""
 
 

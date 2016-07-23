@@ -3,7 +3,7 @@ from classes.JDLCreator import JDLCreator # import the class to create and submi
 import numpy
 
 def main():
-    jobs = JDLCreator()  #run jobs on condocker cloude site
+    jobs = JDLCreator("condocker")  #run jobs on condocker cloude site
     ##################################
     # submit job 
     ##################################
