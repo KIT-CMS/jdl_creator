@@ -455,8 +455,10 @@ class JDLCreator(object):
 
         command = 'condor_submit %s' % self.__JDLFilename.split('/')[-1]
         print(command)
-        if subprocess.call(command.split(), shell=False):
-            raise RuntimeError('submit failed! Check your configuration')
+        try:
+            subprocess.check_call(command.split())
+        except subprocess.CalledProcessError as err:
+            raise RuntimeError('Submit failed (RC %d)! %s' % (err.returncode, err.output))
 
         # jump back
         if len(main_path) > 0:
