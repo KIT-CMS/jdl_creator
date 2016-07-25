@@ -19,7 +19,7 @@ class CloudSite(object):
         if name == 'condocker':
             self.universe = 'docker'
             self.docker_image = 'mschnepf/slc6-condocker'
-            self.requirements = '(TARGET.CLOUD_SITE == "condocker")'
+
         elif name == 'ekpcloud':
             self.universe = 'vanilla'
             self.requirements = '(TARGET.CLOUD_SITE == "ekpcloud")'
@@ -27,7 +27,7 @@ class CloudSite(object):
         elif name == 'ekpsupermachines':
             self.universe = 'docker'
             self.docker_image = 'mschnepf/slc6-condocker'
-            self.requirements = '(TARGET.CLOUD_SITE == "ekpsupermachines")'
+            self.requirements = '(TARGET.CLOUDSITE == "ekpsupermachines")'
 
         elif name == 'bwforcluster':
             self.universe = 'vanilla'
@@ -41,8 +41,7 @@ class CloudSite(object):
             self.universe = 'vanilla'
             self.requirements = '(TARGET.CLOUD_SITE == "oneandone")'
         else:
-            self.universe = 'docker'
-            self.docker_image = 'mschnepf/slc6-condocker'
+            self.universe = 'vanilla'
             self.requirements = ''
 
 
@@ -71,6 +70,7 @@ class JDLCreator(object):
         self._memory = 0
         self._job_folder = job_folder
         self._output_files = output_files
+        self._input_files = ''
         self._remote_job = False
         if len(extra_lines) > 0:
             self._extra_lines = extra_lines
@@ -269,6 +269,21 @@ class JDLCreator(object):
         self._output_files = file_string
 
     @property
+    def input_files(self):
+        # type: () -> str
+        """Files or directories which should be transferred to workernode by HTCondor."""
+        return self._input_files
+
+    @input_files.setter
+    def input_files(self, file_string):
+        # type: (str) -> None
+        self._input_files = file_string
+
+    def SetInputFiles(self, file_string):
+        # type: (str) -> None
+        self._input_files = file_string
+
+    @property
     def remote_job(self):
         # type: () -> boolean
         """Define if an job can run remote"""
@@ -320,7 +335,10 @@ class JDLCreator(object):
             # do docker stuff for exe
             jdl_content.append('executable = ./%s' % exe)
             jdl_content.append('should_transfer_files = YES')
-            jdl_content.append('transfer_input_files = %s' % self.executable)
+            if self._input_files != '':
+                jdl_content.append('transfer_input_files = ' + self.executable + ',' + self._input_files)
+            else:
+                jdl_content.append('transfer_input_files = ' + self.executable)
         else:
             jdl_content.append('executable = %s' % exe)
 
