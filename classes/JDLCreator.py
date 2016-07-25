@@ -114,7 +114,7 @@ class JDLCreator(object):
     def SetFolder(self, folder):
         # type: (str) -> None
         """Defines a folder for JDL file, logs and script"""
-        self._job_folder = folder
+        self.job_folder = folder
 
     def SetExecutable(self, exe):
         # type (str) -> None
@@ -136,11 +136,11 @@ class JDLCreator(object):
 
     def AddExtraLines(self, line):
         # type: (str) -> None
-        self._extra_lines.append(str(line))
+        self.extra_lines = line
 
     def ClearExtraLines(self):
         # type: (str) -> None
-        self._extra_lines = []
+        del self.extra_lines
 
     @property
     def requirements(self):
@@ -180,7 +180,7 @@ class JDLCreator(object):
     def SetWalltime(self, time):
         """Expected maximum job run time (upper limit). Format: seconds"""
         # type: (int) -> None
-        self._wall_time = time
+        self.wall_time = time
 
     @property
     def memory(self):
@@ -196,7 +196,7 @@ class JDLCreator(object):
     def SetMemory(self, memory_):
         # type: (int) -> None
         """Expected maximum memory (upper limit) in MB"""
-        self._memory = memory_
+        self.memory = memory_
 
     @property
     def arguments(self):
@@ -223,13 +223,7 @@ class JDLCreator(object):
     def SetArguments(self, argument):
         # type (str, int, float) -> None
         """Set list of arguments for submit"""
-        if isinstance(argument, list):
-            for line in argument:
-                self.arguments = line
-        elif isinstance(argument, (str, int, float)):
-            self._arguments.append(str(argument))
-        else:
-            raise TypeError('Argument is not a string or a number')
+        self.arguments = argument
 
     @property
     def image(self):
@@ -246,12 +240,7 @@ class JDLCreator(object):
 
     def ChangeImage(self, image_name):
         # type: (str) -> None
-        print(self._cloud_site.docker_image)
-        print(str(self._cloud_site.universe))
-        if self._cloud_site.universe == 'docker':
-            self._cloud_site.docker_image = image_name
-        else:
-            raise AttributeError('You are not in a docker universe. :-(')
+        self.image = image_name
 
     @property
     def output_files(self):
@@ -308,7 +297,7 @@ class JDLCreator(object):
 
     def SetRemoteJob(self, value):
         # type: (boolean) -> None
-        self._remote_job = value
+        self.remote_job = value
 
     def print_stats(self):
         # type: () -> None
@@ -343,7 +332,7 @@ class JDLCreator(object):
         jdl_content.append('universe = %s' % self._cloud_site.universe)
 
         if self._cloud_site.universe == 'docker':
-            jdl_content.append('docker_image = %s' % self._cloud_site.docker_image)
+            jdl_content.append('docker_image = %s' % self.image)
             # do docker stuff for exe
             jdl_content.append('executable = ./%s' % exe)
             self.input_files = './%s' % exe
@@ -382,7 +371,7 @@ class JDLCreator(object):
         else:
             print('Warning: You did not set a walltime! Please add ".wall_time = int" in seconds')
 
-        # add memeory, if set
+        # add memory, if set
         if self._memory > 0:
             jdl_content.append('RequestMemory = %d' % self._memory)
         else:
