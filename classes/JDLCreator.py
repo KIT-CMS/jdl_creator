@@ -53,7 +53,7 @@ class JDLCreator(object):
     LINE_LOG = 'log = log/$(Process).log'
 
     def __init__(self, site_name='', executable='', wall_time=0, job_folder='.',
-                 extra_lines='', output_files='', arguments=''):
+                 extra_lines='', arguments=''):
         # types (str, str, int, str, list, str, list) -> None
         """Class to create JDL files for EKP HTCondor system."""
 
@@ -69,8 +69,8 @@ class JDLCreator(object):
         self._wall_time = int(wall_time)
         self._memory = 0
         self._job_folder = job_folder
-        self._output_files = output_files
-        self._input_files = ''
+        self._output_files = []
+        self._input_files = []
         self._remote_job = False
         if len(extra_lines) > 0:
             self._extra_lines = extra_lines
@@ -257,31 +257,43 @@ class JDLCreator(object):
     def output_files(self):
         # type: () -> str
         """Files or directories which should be transferred back by HTCondor."""
-        return self._output_files
+        return ','.join(self._output_files)
 
     @output_files.setter
     def output_files(self, file_string):
         # type: (str) -> None
-        self._output_files = file_string
+        if isinstance(file_string, list):
+            for line in file_string:
+                self.output_files = line
+        elif isinstance(file_string, (str, int, float)):
+            self._output_files.append(file_string)
+        else:
+            raise TypeError('Output file is not a string or a number.')
 
     def SetOutputFiles(self, file_string):
         # type: (str) -> None
-        self._output_files = file_string
+        self.output_files = file_string
 
     @property
     def input_files(self):
         # type: () -> str
         """Files or directories which should be transferred to workernode by HTCondor."""
-        return self._input_files
+        return ','.join(self._input_files)
 
     @input_files.setter
     def input_files(self, file_string):
         # type: (str) -> None
-        self._input_files = file_string
+        if isinstance(file_string, list):
+            for line in file_string:
+                self._input_files = line
+        elif isinstance(file_string, (str, int, float)):
+            self._input_files.append(file_string)
+        else:
+            raise TypeError('Output file is not a string or a number.')
 
     def SetInputFiles(self, file_string):
         # type: (str) -> None
-        self._input_files = file_string
+        self.input_files = file_string
 
     @property
     def remote_job(self):
@@ -334,11 +346,7 @@ class JDLCreator(object):
             jdl_content.append('docker_image = %s' % self._cloud_site.docker_image)
             # do docker stuff for exe
             jdl_content.append('executable = ./%s' % exe)
-            jdl_content.append('should_transfer_files = YES')
-            if self._input_files != '':
-                jdl_content.append('transfer_input_files = ' + self.executable + ',' + self._input_files)
-            else:
-                jdl_content.append('transfer_input_files = ' + self.executable)
+            self.input_files = './%s' % exe
         else:
             jdl_content.append('executable = %s' % exe)
 
@@ -347,8 +355,13 @@ class JDLCreator(object):
         jdl_content.append(self.LINE_ERROR)
         jdl_content.append(self.LINE_LOG)
 
-        # add line to transfer files back
-        jdl_content.append('transfer_output_files = "%s"' % self.output_files)
+        # Input and output files
+        if len(self._input_files) > 0 or len(self._output_files) > 0:
+            jdl_content.append('should_transfer_files = YES')
+        if len(self._input_files) > 0:
+            jdl_content.append('transfer_input_files = %s' % self.input_files)
+        if len(self._output_files) > 0:
+            jdl_content.append('transfer_output_files = %s' % self.output_files)
 
         # add environment variables
         jdl_content.append('getenv = True')
