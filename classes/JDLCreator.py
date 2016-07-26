@@ -210,7 +210,7 @@ class JDLCreator(object):
         if isinstance(argument, list):
             for line in argument:
                 self.arguments = line
-        elif isinstance(argument, (str, int, float)):
+        elif isinstance(argument, (str, int, float, unicode)):
             self._arguments.append(str(argument))
         else:
             raise TypeError('Argument is not a string or a number')
@@ -275,7 +275,7 @@ class JDLCreator(object):
         if isinstance(file_string, list):
             for line in file_string:
                 self._input_files = line
-        elif isinstance(file_string, (str, int, float)):
+        elif isinstance(file_string, (str, int, float, unicode)):
             self._input_files.append(file_string)
         else:
             raise TypeError('Output file is not a string or a number.')
@@ -335,7 +335,7 @@ class JDLCreator(object):
             jdl_content.append('docker_image = %s' % self.image)
             # do docker stuff for exe
             jdl_content.append('executable = ./%s' % exe)
-            self.input_files = './%s' % exe
+            self.input_files = '%s' % exe
         else:
             jdl_content.append('executable = %s' % exe)
 
@@ -401,10 +401,11 @@ class JDLCreator(object):
 
         if hasattr(self, 'job_folder'):
             # "else" is not needed, since we start with default folder "."
-            os.makedirs(self.job_folder, exist_ok=True)
-            os.makedirs('%s/log' % self.job_folder, exist_ok=True)
-            os.makedirs('%s/out' % self.job_folder, exist_ok=True)
-            os.makedirs('%s/error' % self.job_folder, exist_ok=True)
+            if not os.path.exists(self.job_folder):
+                os.makedirs(self.job_folder, 0777)
+                os.makedirs('%s/log' % self.job_folder, 0777)
+                os.makedirs('%s/out' % self.job_folder, 0777)
+                os.makedirs('%s/error' % self.job_folder, 0777)
             # copy script to folder
             if os.path.isfile(self.executable) and self.job_folder != '.':
                 shutil.copy(self.executable, self.job_folder)
