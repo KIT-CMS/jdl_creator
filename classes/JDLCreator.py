@@ -402,15 +402,15 @@ class JDLCreator(object):
         if hasattr(self, 'job_folder'):
             # "else" is not needed, since we start with default folder "."
             if not os.path.exists(self.job_folder):
-                os.makedirs(self.job_folder, 0777)
-                os.makedirs('%s/log' % self.job_folder, 0777)
-                os.makedirs('%s/out' % self.job_folder, 0777)
-                os.makedirs('%s/error' % self.job_folder, 0777)
+                os.makedirs(self.job_folder)
+                os.makedirs('%s/log' % self.job_folder)
+                os.makedirs('%s/out' % self.job_folder)
+                os.makedirs('%s/error' % self.job_folder)
             # copy script to folder
             if os.path.isfile(self.executable) and self.job_folder != '.':
                 shutil.copy(self.executable, self.job_folder)
                 # make sure the file is executable
-                os.chmod('%s/%s' % (self.job_folder, self.executable), stat.S_IXGRP | stat.S_IXGRP | stat.S_IXOTH)
+                os.chmod('%s/%s' % (self.job_folder, self.executable.split('/')[-1]), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
 
         # create JDL file
         self.__JDLFilename = '%s/JDL_%s' % (self.job_folder, str(self.executable).split('/')[-1].rsplit('.')[0])
