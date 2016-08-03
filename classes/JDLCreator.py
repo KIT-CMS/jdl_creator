@@ -22,7 +22,7 @@ class CloudSite(object):
 
         elif name == 'ekpcloud':
             self.universe = 'vanilla'
-            self.requirements = '(TARGET.CLOUD_SITE == "ekpcloud")'
+            self.requirements = '(TARGET.CLOUDSITE == "ekpcloud")'
 
         elif name == 'ekpsupermachines':
             self.universe = 'docker'
@@ -31,15 +31,15 @@ class CloudSite(object):
 
         elif name == 'bwforcluster':
             self.universe = 'vanilla'
-            self.requirements = '(TARGET.CLOUD_SITE == "bwforcluster")'
+            self.requirements = '(TARGET.CLOUDSITE == "bwforcluster")'
 
         elif name == 'gridka':
             self.universe = 'vanilla'
-            self.requirements = '(TARGET.CLOUD_SITE == "gridka")'
+            self.requirements = '(TARGET.CLOUDSITE == "gridka")'
 
         elif name == 'oneandone':
             self.universe = 'vanilla'
-            self.requirements = '(TARGET.CLOUD_SITE == "oneandone")'
+            self.requirements = '(TARGET.CLOUDSITE == "oneandone")'
         else:
             self.universe = 'vanilla'
             self.requirements = ''
@@ -351,6 +351,8 @@ class JDLCreator(object):
             jdl_content.append('transfer_input_files = %s' % self.input_files)
         if len(self._output_files) > 0:
             jdl_content.append('transfer_output_files = %s' % self.output_files)
+        else:        
+            jdl_content.append('transfer_output_files = ""')
 
         # add environment variables
         jdl_content.append('getenv = True')
