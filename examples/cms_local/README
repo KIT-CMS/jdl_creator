@@ -1,0 +1,27 @@
+############################
+
+    CMS local example
+
+############################
+
+The standard software enviremoent is the SLC6 enviroment.
+That your jobs has acces to the file server or the home folder of the portal 
+machines, you need to set the requirement "TARET.ProvidesEKPResources"
+
+The python script create_jdl.py creates a directory for the JDL file, the 
+executable and subdirecotries for log,error and output files.
+
+Change in the create_jdl.py file the arguments, executable and requerments for
+your job and run than the script. The script calculates 5 asymtotic limits. The
+argument list defines which limits should be calculated.
+
+!!! Change the variable OUTPUT_PATH at the begin of the script !!!
+
+In this example the job run the bash script job.sh. This example script setup 
+the CMSSW software and combine and start a short job. 
+
+Switch in the directory with the JDL file. There you can submit your jobs with 
+"condor_submit JDL..."
+
+With "condor_q (your username)" you can see the status of your jobs. Each jobs 
+should run about 10 mins

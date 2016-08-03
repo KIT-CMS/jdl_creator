@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+import os
+import sys
+
+sys.path.append(os.path.dirname('../../classes')) # change path to classes directory
 from classes.JDLCreator import JDLCreator  # import the class to create and submit JDL files
 
 
@@ -15,7 +19,9 @@ def main():
     arguments = [x for x in range(0, 5)]
     jobs.arguments = arguments  # set arguments for condor job
 
-    jobs.requirements = "(TARGET.PROVIDES_CPU == True) && (TARGET.PROVIDES_EKP_RESOURCES == True) && (TARGET.PROVIDES_BELLE_2 == True)"
+    
+    # requirement CPU job for belle2 at EKP
+    jobs.requirements = "(TARGET.ProvidesCPU == True) && (TARGET.ProvidesEKPResources == True) && (TARGET.ProvidesBELLE2 == True)"
     jobs.wall_time = 1 * 60 * 60  # set walltime to 1h in sec
     jobs.memory = 2048  # set memory to 2048 MB
     jobs.job_folder = "condor_jobs"  # set name of the folder, where files and information are stored

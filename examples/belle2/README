@@ -1,0 +1,23 @@
+############################
+
+    BELLE 2 example
+
+############################
+
+The BELLE 2 software needs special software. These software is supported by the
+HTCondor batch system with a docker image. This image runs only on resources 
+which has "ProvidesBELLE2".
+
+The python script create_jdl.py creates a directory for the JDL file, the 
+executable and subdirecotries for log,error and output files.
+
+Change in the create_jdl.py file the arguments, executable and requerments for
+your job and run than the script.
+
+In this example the job run the bash script job.sh. This script can setup your
+software and start it.
+
+Switch in the directory with the JDL file. There you can submit your jobs with 
+"condor_submit JDL..."
+
+With "condor_q (your username)" you can see the status of your jobs
