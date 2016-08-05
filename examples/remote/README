@@ -1,0 +1,40 @@
+############################
+
+    CMS local example
+
+############################
+
+The standard software enviremoent is the SLC6 enviroment and is provided by all
+remote resources.
+
+To mark your job as an remote job, add the extra line "+RemoteJob=True".
+
+The python script create_jdl.py creates a directory for the JDL file, the 
+executable and subdirecotries for log,error and output files.
+
+Change in the create_jdl.py file the arguments, executable and requerments for
+your job and run than the script. The script calculates asymtotic limits. The
+argument list defines which limits should be calculated.
+
+In this example the job run the bash script job.sh. This example script setup 
+the CMSSW software and combine and start a short job. The CMSSW software and 
+combine is in a tar file "cms_analysis.tar". The pre script "setup.sh" unpack 
+the tar file and will be execute befor your job start. Be sure that the tar file
+and the pre script have the rigth permission for execute and read. Look also 
+that these two file are added to "input_files".
+
+After your job, the post script "pack.sh" runs. This script pack your result 
+text and root files in a tar file "sample_$(process).tar". $(process) is a 
+HTCondor variable, starts with 0 and is differen for each job in a submit. 
+This result file should be tranfer back via HTCondor. Be sure that 
+"sample_$(process).tar" are added to "output_files".
+
+You can put the unpack and pack of the tar file in your "job.sh" script instead 
+of using pre and post script.
+
+
+Switch in the directory with the JDL file. There you can submit your jobs with 
+"condor_submit JDL..."
+
+With "condor_q (your username)" you can see the status of your jobs. Each jobs 
+should run about 7 mins
