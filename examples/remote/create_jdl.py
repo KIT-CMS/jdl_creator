@@ -25,12 +25,11 @@ def main():
 
     jobs.arguments = arguments  # set arguments for condor job
 
-    # Our job requires lots of CPU resources and needs access to the local EKP resources
-    jobs.requirements = 'TARGET.Cloud_Site =="GridKa" '
+    # Our job run only at Freiburg
+    jobs.requirements = 'TARGET.CloudSite =="BWFORCLUSTER" '
 
     # add extra line to run job on remote sites
-    jobs.AddExtraLines('+Remote_Job = True')
-    jobs.AddExtraLines('+Experimental_Job=True')
+    jobs.AddExtraLines('+RemoteJob = True')
 
     # start at the end a script to pack the results in an tar file
     jobs.AddExtraLines('+PreCmd = "setup.sh"')
