@@ -359,11 +359,11 @@ class JDLCreator(object):
 
         # add remote job
         if self._remote_job is True:
-            jdl_content.append('remote_job = true')
+            jdl_content.append('RemoteJob = true')
 
         # add requirements
         if len(self._cloud_site.requirements) > 0:
-            jdl_content.append('requirements = %s' % self._cloud_site.requirements)
+            jdl_content.append('Requirements = %s' % self._cloud_site.requirements)
         else:
             print('Warning: You did not set requirements! Please add ".requirements = str"')
 
