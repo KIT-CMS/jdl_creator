@@ -19,10 +19,11 @@ class CloudSite(object):
         if name == 'condocker':
             self.universe = 'docker'
             self.docker_image = 'mschnepf/slc6-condocker'
+            self.requirements = '(TARGET.CLOUDSITE == "condocker")'
 
-        elif name == 'ekpcloud':
-            self.universe = 'vanilla'
-            self.requirements = '(TARGET.CLOUDSITE == "ekpcloud")'
+        elif name == 'docker':
+            self.universe = 'docker'
+            self.docker_image = 'mschnepf/slc6-condocker'
 
         elif name == 'ekpsupermachines':
             self.universe = 'docker'
@@ -32,10 +33,6 @@ class CloudSite(object):
         elif name == 'bwforcluster':
             self.universe = 'vanilla'
             self.requirements = '(TARGET.CLOUDSITE == "bwforcluster")'
-
-        elif name == 'gridka':
-            self.universe = 'vanilla'
-            self.requirements = '(TARGET.CLOUDSITE == "gridka")'
 
         elif name == 'oneandone':
             self.universe = 'vanilla'
@@ -72,6 +69,9 @@ class JDLCreator(object):
         self._output_files = []
         self._input_files = []
         self._remote_job = False
+        self._cpus = 1
+        self._accounting_group = ""
+        self._cache_files = []
         if len(extra_lines) > 0:
             self._extra_lines = extra_lines
         else:
@@ -199,6 +199,39 @@ class JDLCreator(object):
         self.memory = memory_
 
     @property
+    def cpus(self):
+        """Get Requested number of cores"""
+        return self._cpu
+
+    @cpus.setter
+    def cpus(self, cpus_):
+        # type: (int) -> None
+        """Set Requested number of cores"""
+        self._cpus = cpus_
+
+    def SetCpu(self, cpus_):
+        # type: (int) -> None
+        """Set requested number of cores"""
+        self.cpus = cpus_
+
+    @property
+    def accounting_group(self):
+        """Get accounting group"""
+        return self._cpu
+
+    @accounting_group.setter
+    def accounting_group(self, accounting_group_):
+        # type: (int) -> None
+        """Set accounting group"""
+        self._accounting_group = accounting_group_
+
+    def SetAccounting_group(self, accounting_group_):
+        # type: (int) -> None
+        """Set accounting group"""
+        self.accounting_group = accounting_group_
+
+
+    @property
     def arguments(self):
         # type: () -> list
         return self._arguments
@@ -253,7 +286,7 @@ class JDLCreator(object):
         # type: (str) -> None
         if isinstance(file_string, list):
             for line in file_string:
-                self.output_files = line
+                self._output_files.append(line)
         elif isinstance(file_string, (str, int, float)):
             self._output_files.append(file_string)
         else:
@@ -274,15 +307,37 @@ class JDLCreator(object):
         # type: (str) -> None
         if isinstance(file_string, list):
             for line in file_string:
-                self._input_files = line
-        elif isinstance(file_string, (str, int, float, unicode)):
+                self._input_files.append( line)
+        elif isinstance(file_string, (str, unicode)):
             self._input_files.append(file_string)
         else:
-            raise TypeError('Output file is not a string or a number.')
+            raise TypeError('Input file is not a string or a number.')
 
     def SetInputFiles(self, file_string):
         # type: (str) -> None
         self.input_files = file_string
+
+    @property
+    def cache_files(self):
+        # type: () -> str
+        """Files which should be cached with th HTDA caching."""
+        return ','.join(self._cache_files)
+
+    @input_files.setter
+    def cache_files(self, file_string):
+        # type: (str) -> None
+        if isinstance(file_string, list):
+            for line in file_string:
+                self._cache_files.append(line)
+        elif isinstance(file_string, (str, unicode)):
+            self._cache_files = file_string
+        else:
+            raise TypeError('Cache file is not a string.')
+
+    def SetCacheFiles(self, file_string):
+        # type: (str) -> None
+        self.cache_files = file_string
+
 
     @property
     def remote_job(self):
@@ -347,13 +402,36 @@ class JDLCreator(object):
         # Input and output files
         if len(self._input_files) > 0 or len(self._output_files) > 0:
             jdl_content.append('should_transfer_files = YES')
-        if len(self._input_files) > 0:
-            jdl_content.append('transfer_input_files = %s' % self.input_files)
+        if len(self._input_files) == 1:
+            print(self._input_files)
+            jdl_content.append('transfer_input_files = %s' % self._input_files[0])
+        if len(self._input_files) > 1:
+            filelist =""
+            for line in self._input_files:
+                filelist+=line
+                filelist+=', '
+            jdl_content.append('transfer_input_files = %s' % filelist[:-2])
         if len(self._output_files) > 0:
-            jdl_content.append('transfer_output_files = %s' % self.output_files)
+            jdl_content.append('transfer_output_files = %s' % self._output_files[0])
+        if len(self._output_files) > 1:
+            filelist =""
+            for line in self._output_files:
+                filelist+=line
+                filelist+=', '
+            jdl_content.append('transfer_output_files = %s' % filelist[:-2])
         else:        
             jdl_content.append('transfer_output_files = ""')
 
+        # Cache files 
+        if len(self._cache_files) == 1:
+            jdl_content.append('+Input_Files = "%s"' % self._cache_files[0])
+        if len(self._cache_files) > 1:
+            filelist =""
+            for line in self._cache_files:
+                filelist+=line
+                filelist+=', '
+            jdl_content.append('+Input_Files = "%s"' % filelist[:-2])
+       
         # add environment variables
         jdl_content.append('getenv = True')
 
@@ -378,6 +456,18 @@ class JDLCreator(object):
             jdl_content.append('RequestMemory = %d' % self._memory)
         else:
             print('Warning: You did not set the requested memory! Please add ".memory = int" in MB')
+        
+        # add cpus, if bigger than 1
+        if self._cpus > 1:
+            jdl_content.append('request_cpus = %d' % self._cpus)
+
+        # add accounting group, if set
+        if self._accounting_group is not "":
+            jdl_content.append('accounting_group = %s' % self._accounting_group)
+        else:
+            print('Warning: You did not set the accounting group! Please add ".accounting_group = str"')
+
+
 
         # add extra lines to JDL
         if len(self.extra_lines) > 0:
@@ -415,7 +505,7 @@ class JDLCreator(object):
                 os.chmod('%s/%s' % (self.job_folder, self.executable.split('/')[-1]), stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)
 
         # create JDL file
-        self.__JDLFilename = '%s/JDL_%s' % (self.job_folder, str(self.executable).split('/')[-1].rsplit('.')[0])
+        self.__JDLFilename = '%s/%s.jdl' % (self.job_folder, str(self.executable).split('/')[-1].rsplit('.')[0])
 
         with open(self.__JDLFilename, 'w') as file:
             for line in jdl_content:

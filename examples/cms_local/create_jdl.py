@@ -28,6 +28,7 @@ def main():
 
     jobs.job_folder = "condor_jobs"  # set name of the folder, where files and information are stored
     jobs.WriteJDL()  # write an JDL file and create folder for log files
+    jobs.Submit()
 
 
 if __name__ == "__main__":
