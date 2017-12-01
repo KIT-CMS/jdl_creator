@@ -15,6 +15,7 @@ def main():
     jobs.executable = "job.sh"  # name of the job script
     jobs.wall_time = 10 * 60 * 60  # job will finish in 10 hours
     jobs.memory = 2048  # Our regular 2 GB per core
+    jobs.disk_space = 200
 
     # build list of arguments: 1,2,3,4,5
     arguments = [x for x in range(0, 5)]
@@ -23,7 +24,7 @@ def main():
     jobs.arguments = arguments  # set arguments for condor job
 
     # Our job requires lots of CPU resources and needs access to the local EKP resources
-    jobs.requirements = "(Target.PROVIDES_CPU ==True) && (TARGET.PROVIDES_EKP_RESOURCES == True)"
+    jobs.requirements = "(Target.ProvidesCPU ==True) && (TARGET.ProvidesEKPResources == True)"
 
     jobs.job_folder = "condor_jobs"  # set name of the folder, where files and information are stored
     jobs.WriteJDL()  # write an JDL file and create folder for log files

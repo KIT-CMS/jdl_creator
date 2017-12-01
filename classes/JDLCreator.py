@@ -65,6 +65,7 @@ class JDLCreator(object):
         self._cloud_site = CloudSite(site_name.lower())
         self._wall_time = int(wall_time)
         self._memory = 0
+        self._disk_space = 0
         self._job_folder = job_folder
         self._output_files = []
         self._input_files = []
@@ -213,6 +214,23 @@ class JDLCreator(object):
         # type: (int) -> None
         """Set requested number of cores"""
         self.cpus = cpus_
+
+    @property
+    def disk_space(self):
+        """Requested disk space in MB"""
+        return self._disk_space
+
+    @memory.setter
+    def disk_space(self, disk_space_):
+        # type: (int) -> None
+        """Expected maximum disk_space (upper limit) in MB"""
+        self._disk_space = disk_space_
+
+    def SetMemory(self, disk_space_):
+        # type: (int) -> None
+        """Expected maximum disk space (upper limit) in MB"""
+        self.memory = disk_space_
+
 
     @property
     def accounting_group(self):
@@ -460,6 +478,9 @@ class JDLCreator(object):
         # add cpus, if bigger than 1
         if self._cpus > 1:
             jdl_content.append('request_cpus = %d' % self._cpus)
+
+        if self._disk_space > 0:
+            jdl_content.append('request_disk = %d' % (1024 * self._disk_space))
 
         # add accounting group, if set
         if self._accounting_group is not "":
