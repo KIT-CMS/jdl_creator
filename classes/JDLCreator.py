@@ -429,9 +429,9 @@ class JDLCreator(object):
                 filelist+=line
                 filelist+=', '
             jdl_content.append('transfer_input_files = %s' % filelist[:-2])
-        if len(self._output_files) > 0:
+        if len(self._output_files) == 1:
             jdl_content.append('transfer_output_files = %s' % self._output_files[0])
-        if len(self._output_files) > 1:
+        elif len(self._output_files) > 1:
             filelist =""
             for line in self._output_files:
                 filelist+=line
