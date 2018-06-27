@@ -455,7 +455,7 @@ class JDLCreator(object):
 
         # add remote job
         if self._remote_job is True:
-            jdl_content.append('RemoteJob = true')
+            jdl_content.append('+RemoteJob = True')
 
         # add requirements
         if len(self._cloud_site.requirements) > 0:
